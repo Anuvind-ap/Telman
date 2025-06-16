@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "986577349475",
+    "project_id": "telman-79baf",
+    "storage_bucket": "telman-79baf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:986577349475:android:280f7807dc52a53f840156",
+        "android_client_info": {
+          "package_name": "com.example.telman"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCORVAs0NYGZo2RkpjKBtbgvaC8b21SAzo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
