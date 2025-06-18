@@ -35,8 +35,12 @@
         <activity android:name=".activities.AddBotActivity" />
         <activity android:name=".activities.ChannelListActivity" />
         <activity android:name=".activities.ChatStatsActivity" />
+
         <activity android:name=".activities.AddChannelActivity" />
         <activity android:name=".activities.ChannelActionActivity" />
+
+
+
 
     </application>
 

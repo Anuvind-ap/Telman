@@ -1,6 +1,5 @@
 package com.example.telman.activities
 
-
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -36,27 +35,27 @@ class DashboardActivity : AppCompatActivity() {
         fab.setOnClickListener {
             startActivity(Intent(this, AddBotActivity::class.java))
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
         loadBots()
     }
 
     private fun loadBots() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         db.collection("users").document(uid).collection("bots")
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                    return@addSnapshotListener
-                }
-
+            .get()
+            .addOnSuccessListener { documents ->
                 bots.clear()
-                snapshot?.documents?.forEach { doc ->
-                    val bot = doc.toObject(Bot::class.java)
-                    if (bot != null) {
-                        bots.add(bot)
-                    }
+                for (document in documents) {
+                    val bot = document.toObject(Bot::class.java)
+                    bots.add(bot)
                 }
                 adapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error loading bots: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -65,6 +64,7 @@ class DashboardActivity : AppCompatActivity() {
         db.collection("users").document(uid).collection("bots").document(bot.id).delete()
             .addOnSuccessListener {
                 Toast.makeText(this, "Bot deleted", Toast.LENGTH_SHORT).show()
+                loadBots() // Reload the list after deletion
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Failed to delete bot: ${it.message}", Toast.LENGTH_SHORT).show()
