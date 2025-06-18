@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         if (auth.currentUser != null) {
-            startActivity(Intent(this, DashboardActivity::class.java))
+            startActivity(Intent(this, HomeActivity::class.java))
         } else {
             startActivity(Intent(this, LoginActivity::class.java))
         }

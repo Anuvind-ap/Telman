@@ -1,18 +1,21 @@
-package com.example.telman.adapter
-
+package com.example.telman.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.telman.models.Channel
 import com.example.telman.R
+import com.example.telman.models.Channel
 
-class ChannelAdapter(private val channels: List<Channel>) : RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder>() {
-    class ChannelViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(R.id.channelTitle)
-        val members: TextView = view.findViewById(R.id.channelMembers)
+class ChannelAdapter(
+    private val channels: List<Channel>,
+    private val onClick: (Channel) -> Unit
+) : RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder>() {
+
+    inner class ChannelViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val nameTextView: TextView = itemView.findViewById(R.id.channelName)
+        val subsTextView: TextView = itemView.findViewById(R.id.channelSubscribers)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChannelViewHolder {
@@ -22,9 +25,13 @@ class ChannelAdapter(private val channels: List<Channel>) : RecyclerView.Adapter
 
     override fun onBindViewHolder(holder: ChannelViewHolder, position: Int) {
         val channel = channels[position]
-        holder.title.text = channel.title
-        holder.members.text = "${channel.membersCount} members"
+        holder.nameTextView.text = channel.title
+        holder.subsTextView.text = "@${channel.username}"
+
+        holder.itemView.setOnClickListener {
+            onClick(channel)
+        }
     }
 
-    override fun getItemCount() = channels.size
+    override fun getItemCount(): Int = channels.size
 }
