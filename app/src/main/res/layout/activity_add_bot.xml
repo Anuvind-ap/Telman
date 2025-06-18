@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/botNameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Bot Name" />
+
+    <EditText
+        android:id="@+id/botUsernameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Bot Username" />
+
+    <EditText
+        android:id="@+id/botTokenInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Bot Token" />
+
+    <Button
+        android:id="@+id/saveBotButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Bot" />
+</LinearLayout>
+

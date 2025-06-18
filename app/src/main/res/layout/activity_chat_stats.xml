@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/chatStatsLayout" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="24dp" android:background="@android:color/white">
+
+    <TextView
+        android:id="@+id/chatStatsTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chat Statistics"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingBottom="16dp"
+        android:textColor="#000000" />
+
+    <TextView
+        android:id="@+id/chatStatsText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stats will be displayed here (mock data)."
+        android:textSize="16sp"
+        android:textColor="#333333"
+        android:lineSpacingExtra="8dp" />
+
+</LinearLayout>
