@@ -1,0 +1,25 @@
+<!-- res/layout/activity_add_channel.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/channelTitleInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Channel Title" />
+
+    <EditText
+        android:id="@+id/channelUsernameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@channelusername" />
+
+    <Button
+        android:id="@+id/saveChannelButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Channel" />
+</LinearLayout>

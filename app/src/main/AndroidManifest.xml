@@ -31,10 +31,16 @@
             android:name=".LoginActivity"
             android:exported="false" />
         <activity android:name=".activities.DashboardActivity" />
+        <activity android:name=".activities.HomeActivity" />
         <activity android:name=".activities.AddBotActivity" />
         <activity android:name=".activities.ChannelListActivity" />
         <activity android:name=".activities.ChatStatsActivity" />
-        <activity android:name=".activities.BotDetailsActivity" />
+
+        <activity android:name=".activities.AddChannelActivity" />
+        <activity android:name=".activities.ChannelActionActivity" />
+
+
+
 
     </application>
 
