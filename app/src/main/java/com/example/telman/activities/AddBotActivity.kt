@@ -2,6 +2,7 @@ package com.example.telman.activities
 
 
 import android.app.DownloadManager
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -30,7 +31,10 @@ class AddBotActivity : AppCompatActivity() {
             val username = usernameInput.text.toString().trim()
             if (token.isEmpty()) return@setOnClickListener
             fetchBotInfo(token)
-            saveBot(name, username, token)
+
+            startActivity(Intent(this, DashboardActivity::class.java))
+
+
 
 
         }
