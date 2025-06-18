@@ -196,94 +196,67 @@ class BotService : Service() {
     private fun processCommand(text: String, chatId: Long, bot: Bot) {
         try {
             Log.d(TAG, "Processing command: $text")
-            
-            // Check if it's a command (starts with /)
+
             if (text.startsWith("/")) {
-                val command = text.substring(1) // Remove the / prefix
+                val command = text.substring(1).trim().lowercase()
                 Log.d(TAG, "Processing command: /$command")
-                
-                // First check for built-in commands
-                when (command.lowercase()) {
+
+                when (command) {
                     "hello" -> {
-                        Log.d(TAG, "Processing built-in /hello command")
                         sendMessage(bot.token, chatId, "Hello from ${bot.name}! 👋")
                         return
                     }
                     "start" -> {
-                        Log.d(TAG, "Processing built-in /start command")
                         sendMessage(bot.token, chatId, "Welcome to ${bot.name}! I'm ready to help you.")
                         return
                     }
                     "debug" -> {
-                        Log.d(TAG, "Processing debug command")
                         val uid = FirebaseAuth.getInstance().currentUser?.uid
-                        if (uid != null) {
-                            getAllCommands(uid, bot.id) { commands ->
-                                val debugMessage = "Bot ID: ${bot.id}\nUser ID: $uid\nAvailable commands: $commands"
-                                sendMessage(bot.token, chatId, debugMessage)
-                            }
-                        } else {
+                        if (uid == null) {
+                            Log.e(TAG, "No user logged in for /debug")
                             sendMessage(bot.token, chatId, "Debug: No user logged in")
+                            return
+                        }
+                        getAllCommands(uid, bot.id) { commands ->
+                            val debugMessage = "Bot ID: ${bot.id}\nUser ID: $uid\nAvailable commands: $commands"
+                            sendMessage(bot.token, chatId, debugMessage)
                         }
                         return
                     }
                 }
 
-                // Then check for custom commands in Firestore
                 val uid = FirebaseAuth.getInstance().currentUser?.uid
-                if (uid != null) {
-                    Log.d(TAG, "Checking for custom command: $command")
-                    Log.d(TAG, "User ID: $uid, Bot ID: ${bot.id}")
-                    
-                    db.collection("users").document(uid)
-                        .collection("bots").document(bot.id)
-                        .collection("commands")
-                        .document(command)
-                        .get()
-                        .addOnSuccessListener { document ->
-                            Log.d(TAG, "Firestore response for command '$command': exists=${document.exists()}")
-                            if (document.exists()) {
-                                try {
-                                    val commandResponse = document.getString("response")
-                                    Log.d(TAG, "Command response: $commandResponse")
-                                    if (commandResponse != null) {
-                                        Log.d(TAG, "Found custom command response: $commandResponse")
-                                        sendMessage(bot.token, chatId, commandResponse)
-                                    } else {
-                                        Log.e(TAG, "Command response is null")
-                                        sendMessage(bot.token, chatId, "Sorry, this command is not configured properly.")
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "Error parsing command response: ${e.message}")
-                                    sendMessage(bot.token, chatId, "Sorry, there was an error processing this command.")
-                                }
-                            } else {
-                                Log.d(TAG, "Command not found: $command")
-                                // Let's also try to get all commands to debug
-                                getAllCommands(uid, bot.id) { commands ->
-                                    Log.d(TAG, "Available commands: $commands")
-                                    sendMessage(bot.token, chatId, "Sorry, I don't recognize that command. Available commands: $commands")
-                                }
-                            }
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e(TAG, "Error fetching command: ${e.message}")
-                            sendMessage(bot.token, chatId, "Sorry, there was an error processing your command.")
-                        }
-                } else {
-                    Log.e(TAG, "No user logged in")
-                    sendMessage(bot.token, chatId, "Sorry, there was an authentication error.")
+                if (uid == null) {
+                    Log.e(TAG, "No user logged in for custom command")
+                    sendMessage(bot.token, chatId, "Error: No user logged in")
+                    return
                 }
-            } else {
-                Log.d(TAG, "Message is not a command: $text")
+
+                db.collection("users").document(uid)
+                    .collection("bots").document(bot.id)
+                    .collection("commands")
+                    .document(command)
+                    .get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val commandResponse = document.getString("response")
+                            if (commandResponse != null) {
+                                sendMessage(bot.token, chatId, commandResponse)
+                            } else {
+                                sendMessage(bot.token, chatId, "Sorry, this command is not configured properly.")
+                            }
+                        } else {
+                            sendMessage(bot.token, chatId, "Sorry, I don't recognize that command.")
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Error fetching command: ${e.message}")
+                        sendMessage(bot.token, chatId, "Error fetching command: ${e.message}")
+                    }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error processing command: ${e.message}")
-            try {
-                sendMessage(bot.token, chatId, "Sorry, there was an error processing your command.")
-            } catch (sendError: Exception) {
-                Log.e(TAG, "Error sending error message: ${sendError.message}")
-            }
+            sendMessage(bot.token, chatId, "Error processing command: ${e.message}")
         }
     }
 

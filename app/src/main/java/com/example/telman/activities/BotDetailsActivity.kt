@@ -1,5 +1,6 @@
 package com.example.telman.activities
 
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
@@ -17,6 +18,11 @@ import android.util.Log
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.QueryDocumentSnapshot
+import com.google.firebase.firestore.DocumentSnapshot
 
 class BotDetailsActivity : AppCompatActivity() {
     private lateinit var bot: Bot
@@ -25,6 +31,7 @@ class BotDetailsActivity : AppCompatActivity() {
     private lateinit var botTokenText: TextView
     private lateinit var startStopButton: Button
     private lateinit var manageCommandsButton: Button
+    private val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -148,5 +155,110 @@ class BotDetailsActivity : AppCompatActivity() {
             { error -> Log.e("BotService", "setMyCommands error: ${error.message}") }
         )
         queue.add(request)
+    }
+
+    private fun processCommand(text: String, chatId: Long, bot: Bot) {
+        try {
+            Log.d(TAG, "Processing command: $text")
+
+            if (text.startsWith("/")) {
+                val command = text.substring(1).trim().lowercase()
+                Log.d(TAG, "Processing command: /$command")
+
+                when (command) {
+                    "hello" -> {
+                        sendMessage(bot.token, chatId, "Hello from ${bot.name}! 👋")
+                        return
+                    }
+                    "start" -> {
+                        sendMessage(bot.token, chatId, "Welcome to ${bot.name}! I'm ready to help you.")
+                        return
+                    }
+                    "debug" -> {
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid
+                        if (uid == null) {
+                            Log.e(TAG, "No user logged in for /debug")
+                            sendMessage(bot.token, chatId, "Debug: No user logged in")
+                            return
+                        }
+                        getAllCommands(uid, bot.id) { commands ->
+                            val debugMessage = "Bot ID: ${bot.id}\nUser ID: $uid\nAvailable commands: $commands"
+                            sendMessage(bot.token, chatId, debugMessage)
+                        }
+                        return
+                    }
+                }
+
+                val uid = FirebaseAuth.getInstance().currentUser?.uid
+                if (uid == null) {
+                    Log.e(TAG, "No user logged in for custom command")
+                    sendMessage(bot.token, chatId, "Error: No user logged in")
+                    return
+                }
+
+                db.collection("users").document(uid)
+                    .collection("bots").document(bot.id)
+                    .collection("commands")
+                    .document(command)
+                    .get()
+                    .addOnSuccessListener { doc: DocumentSnapshot ->
+                        if (doc.exists()) {
+                            val commandResponse = doc.getString("response")
+                            if (commandResponse != null) {
+                                sendMessage(bot.token, chatId, commandResponse)
+                            } else {
+                                sendMessage(bot.token, chatId, "Sorry, this command is not configured properly.")
+                            }
+                        } else {
+                            sendMessage(bot.token, chatId, "Sorry, I don't recognize that command.")
+                        }
+                    }
+                    .addOnFailureListener { e: Exception ->
+                        Log.e(TAG, "Error fetching command: ${e.message}")
+                        sendMessage(bot.token, chatId, "Error fetching command: ${e.message}")
+                    }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing command: ${e.message}")
+            sendMessage(bot.token, chatId, "Error processing command: ${e.message}")
+        }
+    }
+
+    private fun sendMessage(token: String, chatId: Long, text: String) {
+        try {
+            val url = "https://api.telegram.org/bot$token/sendMessage"
+            val params = org.json.JSONObject().apply {
+                put("chat_id", chatId)
+                put("text", text)
+            }
+
+            val queue = com.android.volley.toolbox.Volley.newRequestQueue(this)
+            val request = com.android.volley.toolbox.JsonObjectRequest(
+                com.android.volley.Request.Method.POST, url, params,
+                { response -> android.util.Log.d(TAG, "Message sent successfully: $text") },
+                { error -> android.util.Log.e(TAG, "Error sending message: ${error.message}") }
+            )
+            queue.add(request)
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "Error in sendMessage: ${e.message}")
+        }
+    }
+
+    private fun getAllCommands(uid: String, botId: String, callback: (String) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users").document(uid)
+            .collection("bots").document(botId)
+            .collection("commands")
+            .get()
+            .addOnSuccessListener { documents: QuerySnapshot ->
+                val commands = documents.mapNotNull { doc: QueryDocumentSnapshot ->
+                    doc.getString("command")
+                }
+                callback(commands.joinToString(", ") { "/$it" })
+            }
+            .addOnFailureListener { e: Exception ->
+                android.util.Log.e(TAG, "Error getting all commands: ${e.message}")
+                callback("none found")
+            }
     }
 } 

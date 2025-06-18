@@ -192,15 +192,16 @@ class ManageCommandsActivity : AppCompatActivity() {
 
     private fun saveCommand(command: String, response: String) {
         val uid = auth.currentUser?.uid ?: return
+        val cleanCommand = command.trim().lowercase()
         val newCommand = BotCommand(
-            command = command,
+            command = cleanCommand,
             response = response
         )
 
         db.collection("users").document(uid)
             .collection("bots").document(bot.id)
             .collection("commands")
-            .document(command)
+            .document(cleanCommand)
             .set(newCommand)
             .addOnSuccessListener {
                 Toast.makeText(this, "Command added successfully", Toast.LENGTH_SHORT).show()
@@ -214,10 +215,11 @@ class ManageCommandsActivity : AppCompatActivity() {
 
     private fun updateCommand(command: String, response: String) {
         val uid = auth.currentUser?.uid ?: return
+        val cleanCommand = command.trim().lowercase()
         val commandRef = db.collection("users").document(uid)
             .collection("bots").document(bot.id)
             .collection("commands")
-            .document(command)
+            .document(cleanCommand)
 
         val updates = hashMapOf<String, Any>(
             "response" to response
@@ -236,10 +238,11 @@ class ManageCommandsActivity : AppCompatActivity() {
 
     private fun deleteCommand(command: BotCommand) {
         val uid = auth.currentUser?.uid ?: return
+        val cleanCommand = command.command.trim().lowercase()
         db.collection("users").document(uid)
             .collection("bots").document(bot.id)
             .collection("commands")
-            .document(command.command)
+            .document(cleanCommand)
             .delete()
             .addOnSuccessListener {
                 Toast.makeText(this, "Command deleted successfully", Toast.LENGTH_SHORT).show()
