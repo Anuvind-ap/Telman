@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.telman.activities.DashboardActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
@@ -34,6 +35,7 @@ class LoginActivity : AppCompatActivity() {
 
             if (validateInput(email, password)) {
                 loginUser(email, password)
+                startActivity(Intent(this, DashboardActivity::class.java))
             }
         }
 
